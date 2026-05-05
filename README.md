@@ -4,24 +4,35 @@ Image compression and format conversion that's instant, native, and stays out of
 
 > Status: early. macOS-only for now. Windows and Linux are planned via a Tauri shell that links the same Rust core.
 
-## Download
+## Install
 
-- **[Latest build](https://github.com/migoll/pulp/releases/tag/latest)** — built from `main` on every push.
-- **[Tagged releases](https://github.com/migoll/pulp/releases)** — versioned snapshots.
-
-Apple Silicon only for now.
-
-### Running an unsigned build
-
-Pulp isn't signed by an Apple Developer ID (the $99/year membership), so macOS Gatekeeper will refuse to open it with a misleading *"Pulp is damaged and can't be opened"* dialog. The fix is one command:
+One line in Terminal:
 
 ```bash
-xattr -cr /path/to/Pulp.app
+curl -fsSL https://raw.githubusercontent.com/migoll/pulp/main/install.sh | bash
 ```
 
-That strips the quarantine flag the browser added on download. After that, double-clicking works normally.
+That downloads the latest release, strips macOS's quarantine flag, drops the app into `/Applications`, and launches it. Replaces any existing install. Apple Silicon, macOS 26+.
 
-> The old "right-click → Open" workaround stopped working in recent macOS — Apple tightened Gatekeeper for ad-hoc signed apps. `xattr` is the reliable path until we ship a notarized build.
+Pin to a specific version, or grab the rolling pre-release:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/migoll/pulp/main/install.sh | bash -s -- v0.1.0
+curl -fsSL https://raw.githubusercontent.com/migoll/pulp/main/install.sh | bash -s -- latest
+```
+
+### Manual install
+
+Prefer to do it yourself? Grab the zip from [latest](https://github.com/migoll/pulp/releases/tag/latest) or [tagged releases](https://github.com/migoll/pulp/releases), then:
+
+```bash
+unzip -o ~/Downloads/Pulp-*.zip -d ~/Downloads/
+xattr -cr ~/Downloads/Pulp.app
+mv ~/Downloads/Pulp.app /Applications/
+open /Applications/Pulp.app
+```
+
+The `xattr` step is required because Pulp isn't signed by an Apple Developer ID — without it, macOS shows a misleading *"Pulp is damaged"* dialog. The old right-click → Open workaround was tightened out of recent macOS, so `xattr` is the reliable path until we ship a notarized build.
 
 ## Why
 
