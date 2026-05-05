@@ -20,19 +20,23 @@ struct ImageCard: View {
 
     private var preview: some View {
         ZStack(alignment: .topTrailing) {
-            Group {
-                if let nsImage = doc.thumbnail {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    Color.black.opacity(0.3)
+            // Color.clear sets the box; the image overlays it. This way the
+            // image's intrinsic aspect ratio can't push the card wider than the
+            // grid cell allocates.
+            Color.clear
+                .frame(height: 160)
+                .frame(maxWidth: .infinity)
+                .overlay {
+                    if let nsImage = doc.thumbnail {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        Color.black.opacity(0.3)
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 160)
-            .clipped()
-            .blur(radius: doc.isEncoding ? 6 : 0)
+                .clipped()
+                .blur(radius: doc.isEncoding ? 6 : 0)
 
             if doc.isEncoding {
                 ZStack {
@@ -73,6 +77,7 @@ struct ImageCard: View {
                 .font(.system(size: 12, weight: .medium))
                 .lineLimit(1)
                 .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 6) {
                 Text(formatBytes(doc.sourceByteCount))

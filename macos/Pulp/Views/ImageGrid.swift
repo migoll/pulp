@@ -3,7 +3,7 @@ import SwiftUI
 struct ImageGrid: View {
     @EnvironmentObject private var state: AppState
 
-    private let columns = [GridItem(.adaptive(minimum: 220), spacing: 16)]
+    private let columns = [GridItem(.adaptive(minimum: 220, maximum: 280), spacing: 16)]
 
     var body: some View {
         VStack(spacing: 16) {
