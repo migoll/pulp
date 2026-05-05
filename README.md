@@ -46,6 +46,16 @@ For a universal release binary:
 UNIVERSAL=1 scripts/build-core.sh
 ```
 
+To regenerate the AppIcon set after editing `assets/icons/pulp-dark.png` or
+`assets/icons/pulp-transparent.png`:
+
+```bash
+scripts/build-icons.sh
+```
+
+The light variant is composited on the fly (transparent design over `#f1f1f1`),
+so you only need to maintain the dark and transparent originals.
+
 ## Supported formats
 
 | Format | Decode | Encode |
