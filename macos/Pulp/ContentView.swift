@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -18,6 +19,14 @@ struct ContentView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
+        .contentShape(.rect)
+        .onTapGesture { resignFocus() }
+        .onAppear {
+            // macOS auto-promotes the first text field to first responder when
+            // the window opens. Push it back so we don't start with the quality
+            // field selected.
+            DispatchQueue.main.async { resignFocus() }
+        }
         .onDrop(of: [.fileURL, .image], isTargeted: nil) { providers in
             state.handleDrop(providers: providers)
             return true
@@ -29,5 +38,9 @@ struct ContentView: View {
                 onCancel: { state.cancelSaveAll() }
             )
         }
+    }
+
+    private func resignFocus() {
+        NSApp.keyWindow?.makeFirstResponder(nil)
     }
 }
