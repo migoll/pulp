@@ -4,6 +4,23 @@ Image compression and format conversion that's instant, native, and stays out of
 
 > Status: early. macOS-only for now. Windows and Linux are planned via a Tauri shell that links the same Rust core.
 
+## Download
+
+- **[Latest build](https://github.com/migoll/pulp/releases/tag/latest)** — built from `main` on every push.
+- **[Tagged releases](https://github.com/migoll/pulp/releases)** — versioned snapshots.
+
+Apple Silicon only for now.
+
+### Running an unsigned build
+
+Pulp isn't signed by an Apple Developer ID (the $99/year membership), so macOS Gatekeeper will block it the first time you open it. Pick one:
+
+- Right-click `Pulp.app` → **Open** → confirm in the dialog.
+- Or strip the quarantine flag once:
+  ```bash
+  xattr -cr /path/to/Pulp.app
+  ```
+
 ## Why
 
 Most image-compression tools are random web apps with ads and a 5 MB upload cap. Pulp is a desktop app, runs entirely offline, and is fast because it decodes once and re-encodes from the in-memory pixel buffer every time you change a setting.
@@ -45,6 +62,17 @@ For a universal release binary:
 ```bash
 UNIVERSAL=1 scripts/build-core.sh
 ```
+
+## Releasing
+
+Pushes to `main` automatically rebuild the rolling **Latest build** release. To cut a versioned release, tag the commit and push the tag:
+
+```bash
+git tag v0.1.1
+git push --tags
+```
+
+GitHub Actions builds the app and creates a permanent release with auto-generated notes.
 
 To regenerate the AppIcon set after editing `assets/icons/pulp-dark.png` or
 `assets/icons/pulp-transparent.png`:

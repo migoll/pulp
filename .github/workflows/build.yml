@@ -1,0 +1,105 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: |
+          if [ -d "/Applications/Xcode_26.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_26.0.app
+          fi
+          xcodebuild -version
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$(awk -F'"' '/MARKETING_VERSION/{print $2}' macos/project.yml)-dev"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "Building $VERSION (build ${{ github.run_number }})"
+
+      - name: Build Rust core
+        run: ./scripts/build-core.sh
+
+      - name: Generate Xcode project
+        run: cd macos && xcodegen generate
+
+      - name: Build Pulp.app
+        run: |
+          cd macos
+          xcodebuild \
+            -project Pulp.xcodeproj \
+            -scheme Pulp \
+            -configuration Release \
+            -derivedDataPath build \
+            -destination "platform=macOS,arch=arm64" \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            MARKETING_VERSION="${{ steps.version.outputs.version }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.version.outputs.build }}" \
+            build
+
+      - name: Package
+        if: github.event_name != 'pull_request'
+        run: |
+          cd macos/build/Build/Products/Release
+          ditto -c -k --keepParent Pulp.app "Pulp-${{ steps.version.outputs.version }}.zip"
+          ls -la
+
+      - name: Update rolling "latest" release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest build
+          prerelease: true
+          files: macos/build/Build/Products/Release/Pulp-*.zip
+          body: |
+            Rolling build from `main`. Replaced on every push.
+
+            **Install:**
+            1. Download the zip and unzip it.
+            2. The app is unsigned (we don't pay Apple's $99/yr Developer fee), so macOS will refuse it on first launch. Either:
+               - Right-click `Pulp.app` → Open → confirm, **or**
+               - Run `xattr -cr /path/to/Pulp.app` once.
+
+            Built from commit ${{ github.sha }}.
+
+      - name: Create versioned release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: macos/build/Build/Products/Release/Pulp-*.zip
+          generate_release_notes: true
+          body: |
+            **Install:**
+            1. Download the zip and unzip it.
+            2. The app is unsigned (we don't pay Apple's $99/yr Developer fee), so macOS will refuse it on first launch. Either:
+               - Right-click `Pulp.app` → Open → confirm, **or**
+               - Run `xattr -cr /path/to/Pulp.app` once.
+
+            ---
