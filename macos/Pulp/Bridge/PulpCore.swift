@@ -43,13 +43,10 @@ final class PulpImage: @unchecked Sendable {
         return Data(bytes: buffer.pointee.data, count: buffer.pointee.len)
     }
 
-    private static func decodeViaImageIO(_ data: Data) -> PulpImage? {
-        guard
-            let source = CGImageSourceCreateWithData(data as CFData, nil),
-            let cg = CGImageSourceCreateImageAtIndex(source, 0, nil),
-            let rgba = cg.rgba8Bytes()
-        else { return nil }
-
+    /// Build a PulpImage from a CGImage. The pixels are repainted into RGBA8
+    /// before being handed off so the Rust side gets a known layout.
+    static func from(cgImage: CGImage) -> PulpImage? {
+        guard let rgba = cgImage.rgba8Bytes() else { return nil }
         return rgba.pixels.withUnsafeBufferPointer { buffer -> PulpImage? in
             guard let base = buffer.baseAddress,
                   let handle = pulp_image_from_rgba(
@@ -59,6 +56,14 @@ final class PulpImage: @unchecked Sendable {
             else { return nil }
             return PulpImage(handle: handle)
         }
+    }
+
+    private static func decodeViaImageIO(_ data: Data) -> PulpImage? {
+        guard
+            let source = CGImageSourceCreateWithData(data as CFData, nil),
+            let cg = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else { return nil }
+        return PulpImage.from(cgImage: cg)
     }
 }
 
@@ -127,7 +132,7 @@ private extension Comparable {
     }
 }
 
-private extension CGImage {
+fileprivate extension CGImage {
     /// Repaint the image into a known RGBA8 layout so the Rust side can take
     /// the buffer at face value. ImageIO will hand us all sorts of pixel
     /// formats otherwise (premultiplied, BGRA, 16-bit float…).

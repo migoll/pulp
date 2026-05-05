@@ -35,6 +35,9 @@ struct ImageCard: View {
 
             if hovering {
                 HStack(spacing: 6) {
+                    cardButton(systemImage: "crop") {
+                        state.requestCrop(doc)
+                    }
                     cardButton(systemImage: "square.and.arrow.down") {
                         state.save(doc)
                     }

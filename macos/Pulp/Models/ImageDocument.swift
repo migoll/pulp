@@ -1,14 +1,15 @@
 import AppKit
 import Foundation
+import ImageIO
 
 @MainActor
 final class ImageDocument: ObservableObject, Identifiable {
     let id = UUID()
     let sourceURL: URL?
     let sourceBytes: Data
-    let image: PulpImage
-    let thumbnail: NSImage?
 
+    @Published private(set) var image: PulpImage
+    @Published private(set) var thumbnail: NSImage?
     @Published private(set) var encoded: EncodedResult?
     @Published private(set) var isEncoding = false
 
@@ -25,10 +26,6 @@ final class ImageDocument: ObservableObject, Identifiable {
 
     var sourceByteCount: Int { sourceBytes.count }
 
-    var sourceDimensions: (width: Int, height: Int) {
-        (image.width, image.height)
-    }
-
     /// Re-encode using the supplied settings. Calls overlap safely — only the
     /// most recent result wins, since each call replaces `encoded` on
     /// completion.
@@ -44,6 +41,25 @@ final class ImageDocument: ObservableObject, Identifiable {
         isEncoding = false
         guard let data else { return }
         encoded = EncodedResult(data: data, format: settings.format)
+    }
+
+    /// Replace this document's working image with a cropped copy.
+    ///
+    /// `pixelRect` is in original-image pixel coordinates with origin
+    /// top-left. The source bytes are intentionally left untouched so the
+    /// "savings vs. original" stat keeps comparing against the file the
+    /// user dropped in.
+    func applyCrop(pixelRect: CGRect, settings: EncodeSettings) async {
+        guard
+            let source = CGImageSourceCreateWithData(sourceBytes as CFData, nil),
+            let cg = CGImageSourceCreateImageAtIndex(source, 0, nil),
+            let cropped = cg.cropping(to: pixelRect),
+            let newImage = PulpImage.from(cgImage: cropped)
+        else { return }
+
+        image = newImage
+        thumbnail = NSImage(cgImage: cropped, size: .zero)
+        await encode(with: settings)
     }
 
     private static func makeThumbnail(from data: Data) -> NSImage? {

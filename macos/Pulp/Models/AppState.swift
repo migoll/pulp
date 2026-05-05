@@ -8,6 +8,7 @@ final class AppState: ObservableObject {
     @Published var documents: [ImageDocument] = []
     @Published var settings: EncodeSettings = EncodeSettings()
     @Published var saveAllRequest: SaveAllRequest?
+    @Published var cropTarget: ImageDocument?
 
     private var cancellables: Set<AnyCancellable> = []
     private static let supportedTypes: [UTType] = [
@@ -47,6 +48,21 @@ final class AppState: ObservableObject {
 
     func remove(_ doc: ImageDocument) {
         documents.removeAll { $0.id == doc.id }
+    }
+
+    func requestCrop(_ doc: ImageDocument) {
+        cropTarget = doc
+    }
+
+    func cancelCrop() {
+        cropTarget = nil
+    }
+
+    /// `pixelRect` is in original-image pixel coordinates (top-left origin).
+    func applyCrop(pixelRect: CGRect) {
+        guard let doc = cropTarget else { return }
+        cropTarget = nil
+        Task { await doc.applyCrop(pixelRect: pixelRect, settings: settings) }
     }
 
     func clear() {

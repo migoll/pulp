@@ -38,6 +38,13 @@ struct ContentView: View {
                 onCancel: { state.cancelSaveAll() }
             )
         }
+        .sheet(item: $state.cropTarget) { doc in
+            CropSheet(
+                doc: doc,
+                onApply: { rect in state.applyCrop(pixelRect: rect) },
+                onCancel: { state.cancelCrop() }
+            )
+        }
     }
 
     private func resignFocus() {
