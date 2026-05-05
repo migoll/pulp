@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DropZone: View {
     @EnvironmentObject private var state: AppState
+    @State private var hovering = false
 
     var body: some View {
         Button(action: { state.showOpenPanel() }) {
@@ -17,14 +18,21 @@ struct DropZone: View {
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.white.opacity(hovering ? 0.04 : 0))
+        )
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(
-                    Color.secondary.opacity(0.4),
+                    Color.secondary.opacity(hovering ? 0.7 : 0.4),
                     style: StrokeStyle(lineWidth: 1, dash: [6, 4])
                 )
         }
+        .onHover { hovering = $0 }
+        .animation(.easeOut(duration: 0.15), value: hovering)
     }
 }
