@@ -8,7 +8,7 @@ struct PulpApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(state)
-                .frame(minWidth: 760, minHeight: 540)
+                .frame(minWidth: 700, minHeight: 540)
                 .containerBackground(.regularMaterial, for: .window)
         }
         .windowStyle(.hiddenTitleBar)

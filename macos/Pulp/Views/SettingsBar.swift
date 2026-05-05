@@ -50,7 +50,7 @@ private struct FieldColumn<Content: View>: View {
                 .foregroundStyle(.secondary)
             content
         }
-        .frame(width: 140, alignment: .leading)
+        .frame(minWidth: 100, idealWidth: 140, maxWidth: 140, alignment: .leading)
     }
 }
 
