@@ -65,7 +65,7 @@ private struct FormatPicker: View {
         } label: {
             DropdownLabel(text: value.displayName)
         }
-        .menuStyle(.borderlessButton)
+        .buttonStyle(.plain)
         .menuIndicator(.hidden)
     }
 }
@@ -81,7 +81,7 @@ private struct PresetPicker: View {
         } label: {
             DropdownLabel(text: value.displayName)
         }
-        .menuStyle(.borderlessButton)
+        .buttonStyle(.plain)
         .menuIndicator(.hidden)
     }
 }
