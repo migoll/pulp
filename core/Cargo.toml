@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Image processing engine for Pulp."
 license = "MIT"
-repository = "https://github.com/clu/pulp"
+repository = "https://github.com/migoll/pulp"
 
 [lib]
 name = "pulp_core"
