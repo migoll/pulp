@@ -32,8 +32,21 @@ struct ImageCard: View {
             .frame(maxWidth: .infinity)
             .frame(height: 160)
             .clipped()
+            .blur(radius: doc.isEncoding ? 6 : 0)
 
-            if hovering {
+            if doc.isEncoding {
+                ZStack {
+                    Color.black.opacity(0.25)
+                    ProgressView()
+                        .controlSize(.regular)
+                        .tint(.white)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 160)
+                .transition(.opacity)
+            }
+
+            if hovering && !doc.isEncoding {
                 HStack(spacing: 6) {
                     cardButton(systemImage: "crop") {
                         state.requestCrop(doc)
@@ -50,6 +63,7 @@ struct ImageCard: View {
             }
         }
         .clipShape(.rect(topLeadingRadius: 12, topTrailingRadius: 12))
+        .animation(.easeInOut(duration: 0.16), value: doc.isEncoding)
         .animation(.easeInOut(duration: 0.12), value: hovering)
     }
 
@@ -73,8 +87,6 @@ struct ImageCard: View {
                         Text(delta)
                             .foregroundStyle(.green)
                     }
-                } else if doc.isEncoding {
-                    ProgressView().controlSize(.small)
                 }
             }
             .font(.system(size: 11))
