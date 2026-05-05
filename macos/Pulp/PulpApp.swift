@@ -19,7 +19,7 @@ struct PulpApp: App {
                     .keyboardShortcut("o")
             }
             CommandGroup(after: .saveItem) {
-                Button("Save All…") { state.saveAll() }
+                Button("Save All…") { state.requestSaveAll() }
                     .keyboardShortcut("s", modifiers: [.command, .shift])
                     .disabled(state.documents.count < 2)
             }

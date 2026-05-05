@@ -33,13 +33,15 @@ struct ImageGrid: View {
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
 
-            Button {
-                state.saveAll()
-            } label: {
-                Label("Save all", systemImage: "square.and.arrow.down")
+            if state.documents.count >= 2 {
+                Button {
+                    state.requestSaveAll()
+                } label: {
+                    Label("Save all", systemImage: "square.and.arrow.down")
+                }
+                .buttonStyle(.glass)
+                .controlSize(.small)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
         }
     }
 }

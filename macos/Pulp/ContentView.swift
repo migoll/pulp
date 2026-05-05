@@ -22,5 +22,12 @@ struct ContentView: View {
             state.handleDrop(providers: providers)
             return true
         }
+        .sheet(item: $state.saveAllRequest) { request in
+            SaveAllSheet(
+                count: request.count,
+                onContinue: { folderName in state.performSaveAll(folderName: folderName) },
+                onCancel: { state.cancelSaveAll() }
+            )
+        }
     }
 }

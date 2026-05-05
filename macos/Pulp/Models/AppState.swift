@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 final class AppState: ObservableObject {
     @Published var documents: [ImageDocument] = []
     @Published var settings: EncodeSettings = EncodeSettings()
+    @Published var saveAllRequest: SaveAllRequest?
 
     private var cancellables: Set<AnyCancellable> = []
     private static let supportedTypes: [UTType] = [
@@ -62,21 +63,49 @@ final class AppState: ObservableObject {
         }
     }
 
-    func saveAll() {
-        guard !documents.isEmpty else { return }
-        let folderName = "Pulp Export"
+    /// Show the confirmation sheet that asks about folder wrapping. The
+    /// actual save runs from [`performSaveAll`] once the user confirms.
+    func requestSaveAll() {
+        guard documents.count >= 2 else { return }
+        saveAllRequest = SaveAllRequest(count: documents.count)
+    }
 
+    func cancelSaveAll() {
+        saveAllRequest = nil
+    }
+
+    /// Run the export. Pass `nil` for `folderName` to write straight into the
+    /// chosen directory; pass a non-empty name to create a subfolder.
+    func performSaveAll(folderName: String?) {
+        saveAllRequest = nil
+        guard !documents.isEmpty else { return }
+
+        // Defer until the next runloop so SwiftUI gets a tick to dismiss the
+        // confirmation sheet before NSOpenPanel takes over the main thread.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(150))
+            self?.runSaveAll(folderName: folderName)
+        }
+    }
+
+    private func runSaveAll(folderName: String?) {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
-        panel.prompt = "Export"
-        panel.message = "Choose where to save \(documents.count) images. A new folder \"\(folderName)\" will be created."
+        panel.prompt = "Save"
+        panel.message = "Choose where to save \(documents.count) images."
 
         guard panel.runModal() == .OK, let parent = panel.url else { return }
 
-        let destination = uniqueFolder(in: parent, named: folderName)
-        try? FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        let trimmed = folderName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let destination: URL
+        if let trimmed, !trimmed.isEmpty {
+            destination = uniqueFolder(in: parent, named: trimmed)
+            try? FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        } else {
+            destination = parent
+        }
 
         for doc in documents {
             guard let encoded = doc.encoded else { continue }
@@ -122,6 +151,11 @@ final class AppState: ObservableObject {
         }
         return candidate
     }
+}
+
+struct SaveAllRequest: Identifiable, Equatable {
+    let id = UUID()
+    let count: Int
 }
 
 private extension NSItemProvider {
