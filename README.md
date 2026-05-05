@@ -13,13 +13,15 @@ Apple Silicon only for now.
 
 ### Running an unsigned build
 
-Pulp isn't signed by an Apple Developer ID (the $99/year membership), so macOS Gatekeeper will block it the first time you open it. Pick one:
+Pulp isn't signed by an Apple Developer ID (the $99/year membership), so macOS Gatekeeper will refuse to open it with a misleading *"Pulp is damaged and can't be opened"* dialog. The fix is one command:
 
-- Right-click `Pulp.app` → **Open** → confirm in the dialog.
-- Or strip the quarantine flag once:
-  ```bash
-  xattr -cr /path/to/Pulp.app
-  ```
+```bash
+xattr -cr /path/to/Pulp.app
+```
+
+That strips the quarantine flag the browser added on download. After that, double-clicking works normally.
+
+> The old "right-click → Open" workaround stopped working in recent macOS — Apple tightened Gatekeeper for ad-hoc signed apps. `xattr` is the reliable path until we ship a notarized build.
 
 ## Why
 

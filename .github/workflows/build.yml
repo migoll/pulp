@@ -82,10 +82,12 @@ jobs:
             Rolling build from `main`. Replaced on every push.
 
             **Install:**
-            1. Download the zip and unzip it.
-            2. The app is unsigned (we don't pay Apple's $99/yr Developer fee), so macOS will refuse it on first launch. Either:
-               - Right-click `Pulp.app` → Open → confirm, **or**
-               - Run `xattr -cr /path/to/Pulp.app` once.
+            1. Download the zip and unzip it (most browsers auto-extract).
+            2. The app is unsigned, so macOS shows a misleading *"Pulp is damaged"* dialog on first launch. Strip the quarantine flag once:
+               ```
+               xattr -cr /path/to/Pulp.app
+               ```
+            3. Double-click — it opens normally from then on.
 
             Built from commit ${{ github.sha }}.
 
@@ -97,9 +99,11 @@ jobs:
           generate_release_notes: true
           body: |
             **Install:**
-            1. Download the zip and unzip it.
-            2. The app is unsigned (we don't pay Apple's $99/yr Developer fee), so macOS will refuse it on first launch. Either:
-               - Right-click `Pulp.app` → Open → confirm, **or**
-               - Run `xattr -cr /path/to/Pulp.app` once.
+            1. Download the zip and unzip it (most browsers auto-extract).
+            2. The app is unsigned, so macOS shows a misleading *"Pulp is damaged"* dialog on first launch. Strip the quarantine flag once:
+               ```
+               xattr -cr /path/to/Pulp.app
+               ```
+            3. Double-click — it opens normally from then on.
 
             ---
