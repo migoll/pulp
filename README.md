@@ -43,7 +43,7 @@ Hit **Run**. Xcode will build the Rust core via a pre-build script and link it i
 For a universal release binary:
 
 ```bash
-ARCHS="arm64 x86_64" scripts/build-core.sh
+UNIVERSAL=1 scripts/build-core.sh
 ```
 
 ## Supported formats
