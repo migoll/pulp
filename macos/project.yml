@@ -1,0 +1,52 @@
+name: Pulp
+options:
+  bundleIdPrefix: dev.pulp
+  deploymentTarget:
+    macOS: "26.0"
+  developmentLanguage: en
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: "YES"
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    DEAD_CODE_STRIPPING: "YES"
+
+targets:
+  Pulp:
+    type: application
+    platform: macOS
+    sources:
+      - path: Pulp
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_NAME: "Pulp"
+        PRODUCT_BUNDLE_IDENTIFIER: "dev.pulp.app"
+        INFOPLIST_FILE: "Pulp/Resources/Info.plist"
+        CODE_SIGN_ENTITLEMENTS: "Pulp/Resources/Pulp.entitlements"
+        SWIFT_OBJC_BRIDGING_HEADER: "Pulp/Bridge/PulpCore-Bridging-Header.h"
+        HEADER_SEARCH_PATHS:
+          - "$(SRCROOT)/../core/include"
+        LIBRARY_SEARCH_PATHS:
+          - "$(SRCROOT)/../core/target/release"
+        OTHER_LDFLAGS:
+          - "-lpulp_core"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    preBuildScripts:
+      - name: Build Rust Core
+        script: |
+          set -e
+          bash "$SRCROOT/../scripts/build-core.sh"
+        outputFiles:
+          - "$(SRCROOT)/../core/target/release/libpulp_core.a"
+        basedOnDependencyAnalysis: false
+    dependencies:
+      - sdk: ImageIO.framework
+      - sdk: CoreGraphics.framework

@@ -1,0 +1,30 @@
+[package]
+name = "pulp-core"
+version = "0.1.0"
+edition = "2021"
+description = "Image processing engine for Pulp."
+license = "MIT"
+repository = "https://github.com/clu/pulp"
+
+[lib]
+name = "pulp_core"
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = [
+    "jpeg",
+    "png",
+    "webp",
+    "tiff",
+    "gif",
+    "bmp",
+] }
+webp = "0.3"
+ravif = "0.11"
+rgb = "0.8"
+fast_image_resize = { version = "5", features = ["image"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3

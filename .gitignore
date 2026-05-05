@@ -1,0 +1,17 @@
+# Rust
+/core/target
+
+# Xcode (project file is generated from macos/project.yml)
+/macos/*.xcodeproj
+/macos/*.xcworkspace
+/macos/build
+/macos/DerivedData
+xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
